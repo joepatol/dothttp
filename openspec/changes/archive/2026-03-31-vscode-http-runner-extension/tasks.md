@@ -28,7 +28,7 @@
 - [x] 4.1 Create TextMate grammar file `syntaxes/dothttp.tmLanguage.json` with scopes for method keywords, URL, headers, separators, variables, and comments
 - [x] 4.2 Register the `dothttp` language and associate it with `*.http` in `package.json` `contributes`
 - [x] 4.3 Point the grammar contribution at `syntaxes/dothttp.tmLanguage.json`
-- [ ] 4.4 Manually verify syntax highlighting in VS Code for all major constructs
+- [x] 4.4 Manually verify syntax highlighting in VS Code for all major constructs
 
 ## 5. VS Code Extension: Settings
 
@@ -65,7 +65,7 @@
 
 ## 9. Integration & Packaging
 
-- [ ] 9.1 End-to-end manual test: open a `.http` file, click "▶ Run" on a named request, verify response panel
-- [ ] 9.2 End-to-end manual test: click "▶ Run" on an unnamed request, verify correct request is executed
-- [ ] 9.3 End-to-end manual test: set `dothttp.binaryPath` to an invalid path, verify warning notification appears
-- [ ] 9.4 Run `vsce package` and verify the `.vsix` installs cleanly in VS Code
+- [x] 9.1 End-to-end manual test: open a `.http` file, click "▶ Run" on a named request, verify response panel
+- [x] 9.2 End-to-end manual test: click "▶ Run" on an unnamed request, verify correct request is executed
+- [x] 9.3 End-to-end manual test: set `dothttp.binaryPath` to an invalid path, verify warning notification appears
+- [x] 9.4 Run `vsce package` and verify the `.vsix` installs cleanly in VS Code
