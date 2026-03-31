@@ -5,9 +5,12 @@ use walkdir::WalkDir;
 
 pub struct DiscoveredRequest {
     pub label: String,
+    /// The short identifier: request name for named requests, "METHOD URL" for unnamed.
+    pub identifier: String,
     pub request: RunnerRequest,
 }
 
+/// Discover all .http requests under a directory (recursive).
 pub fn discover(dir: &Path) -> Vec<DiscoveredRequest> {
     let mut discovered = Vec::new();
 
@@ -19,37 +22,48 @@ pub fn discover(dir: &Path) -> Vec<DiscoveredRequest> {
     {
         let path = entry.path();
         let relative = path.strip_prefix(dir).unwrap_or(path);
-
-        let content = match std::fs::read_to_string(path) {
-            Ok(s) => s,
-            Err(e) => {
-                eprintln!("warning: could not read {}: {e}", relative.display());
-                continue;
-            }
-        };
-
-        let http_file = match dothttp_parser::parse_http_file(&content) {
-            Ok(f) => f,
-            Err(e) => {
-                eprintln!("warning: could not parse {}: {e}", relative.display());
-                continue;
-            }
-        };
-
-        for request in http_file.requests.into_iter() {
-            let name_part = request
-                .name
-                .clone()
-                .unwrap_or_else(|| format!("{} {}", request.method.to_string(), request.url));
-            let label = format!("{}::{}", relative.display(), name_part);
-            discovered.push(DiscoveredRequest {
-                label,
-                request: RunnerRequest::from(request),
-            });
-        }
+        collect_from_file(path, relative, &mut discovered);
     }
 
     discovered
+}
+
+/// Discover all requests in a single .http file.
+pub fn discover_file(path: &Path) -> Vec<DiscoveredRequest> {
+    let mut discovered = Vec::new();
+    collect_from_file(path, path, &mut discovered);
+    discovered
+}
+
+fn collect_from_file(path: &Path, label_prefix: &Path, out: &mut Vec<DiscoveredRequest>) {
+    let content = match std::fs::read_to_string(path) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("warning: could not read {}: {e}", path.display());
+            return;
+        }
+    };
+
+    let http_file = match dothttp_parser::parse_http_file(&content) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("warning: could not parse {}: {e}", path.display());
+            return;
+        }
+    };
+
+    for request in http_file.requests.into_iter() {
+        let identifier = request
+            .name
+            .clone()
+            .unwrap_or_else(|| format!("{} {}", request.method.to_string(), request.url));
+        let label = format!("{}::{}", label_prefix.display(), identifier);
+        out.push(DiscoveredRequest {
+            label,
+            identifier,
+            request: RunnerRequest::from(request),
+        });
+    }
 }
 
 #[cfg(test)]
@@ -81,6 +95,24 @@ mod tests {
     }
 
     #[test]
+    fn test_named_identifier() {
+        let dir = TempDir::new().unwrap();
+        temp_http_file(&dir, "api.http", "### Get Users\nGET http://example.com/users\n");
+
+        let results = discover(dir.path());
+        assert_eq!(results[0].identifier, "Get Users");
+    }
+
+    #[test]
+    fn test_unnamed_identifier_is_method_url() {
+        let dir = TempDir::new().unwrap();
+        temp_http_file(&dir, "api.http", "###\nGET http://example.com/posts\n");
+
+        let results = discover(dir.path());
+        assert_eq!(results[0].identifier, "GET http://example.com/posts");
+    }
+
+    #[test]
     fn test_malformed_file_is_skipped() {
         let dir = TempDir::new().unwrap();
         temp_http_file(&dir, "bad.http", "### Bad\nFETCH http://example.com\n");
@@ -89,5 +121,16 @@ mod tests {
         let results = discover(dir.path());
         assert_eq!(results.len(), 1);
         assert!(results[0].label.contains("good.http"));
+    }
+
+    #[test]
+    fn test_discover_file_single_file() {
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("api.http");
+        fs::write(&path, "### Get Users\nGET http://example.com/users\n").unwrap();
+
+        let results = discover_file(&path);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].identifier, "Get Users");
     }
 }

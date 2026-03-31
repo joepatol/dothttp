@@ -1,0 +1,66 @@
+{
+  "name": "dothttp",
+  "displayName": "dothttp",
+  "description": "Run HTTP requests from .http files directly in VS Code",
+  "version": "0.2.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "dothttp",
+        "aliases": ["dothttp", "HTTP"],
+        "extensions": [".http"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "dothttp",
+        "scopeName": "source.dothttp",
+        "path": "./syntaxes/dothttp.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "dothttp.runRequest",
+        "title": "Run HTTP Request",
+        "category": "dothttp"
+      }
+    ],
+    "configuration": {
+      "title": "dothttp",
+      "properties": {
+        "dothttp.binaryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the dothttp-cli binary. Leave empty to resolve from PATH."
+        },
+        "dothttp.defaultEnvironment": {
+          "type": "string",
+          "default": "",
+          "description": "Default environment name to pass as --env to the CLI. Leave empty to use the CLI default."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.3"
+  },
+  "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "@vscode/vsce": "^2.24.0",
+    "typescript": "^5.3.0"
+  }
+}

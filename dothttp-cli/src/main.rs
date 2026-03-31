@@ -7,7 +7,7 @@ use std::process;
 
 use clap::Parser;
 
-use discovery::discover;
+use discovery::{discover, discover_file};
 use display::print_result;
 use selection::{SelectionResult, select};
 
@@ -15,34 +15,55 @@ use selection::{SelectionResult, select};
 #[command(name = "dothttp", about = "Run HTTP requests from .http files")]
 struct Cli {
     /// Directory to scan for .http files (defaults to current directory)
+    #[arg(conflicts_with = "file")]
     dir: Option<PathBuf>,
+
+    /// Path to a specific .http file to run (mutually exclusive with dir)
+    #[arg(long, conflicts_with = "dir")]
+    file: Option<PathBuf>,
+
+    /// Run only the request matching this name or "METHOD URL" identifier
+    #[arg(long)]
+    request: Option<String>,
 }
 
 #[tokio::main]
 async fn main() {
     let cli = Cli::parse();
 
-    let dir = cli
-        .dir
-        .unwrap_or_else(|| std::env::current_dir().expect("cannot determine current directory"));
+    let discovered = if let Some(file_path) = cli.file {
+        if !file_path.exists() {
+            eprintln!("error: file '{}' does not exist", file_path.display());
+            process::exit(1);
+        }
+        if file_path.extension().and_then(|s| s.to_str()) != Some("http") {
+            eprintln!("error: '{}' does not have a .http extension", file_path.display());
+            process::exit(1);
+        }
+        discover_file(&file_path)
+    } else {
+        let dir = cli
+            .dir
+            .unwrap_or_else(|| std::env::current_dir().expect("cannot determine current directory"));
 
-    if !dir.exists() {
-        eprintln!("error: directory '{}' does not exist", dir.display());
-        process::exit(1);
-    }
-    if !dir.is_dir() {
-        eprintln!("error: '{}' is not a directory", dir.display());
-        process::exit(1);
-    }
+        if !dir.exists() {
+            eprintln!("error: directory '{}' does not exist", dir.display());
+            process::exit(1);
+        }
+        if !dir.is_dir() {
+            eprintln!("error: '{}' is not a directory", dir.display());
+            process::exit(1);
+        }
 
-    let discovered = discover(&dir);
+        discover(&dir)
+    };
 
     if discovered.is_empty() {
-        println!("No .http files found in '{}'.", dir.display());
+        println!("No .http requests found.");
         process::exit(0);
     }
 
-    let indices = match select(&discovered) {
+    let indices = match select(&discovered, cli.request.as_deref()) {
         SelectionResult::Selected(idx) => idx,
         SelectionResult::NoneSelected => {
             println!("No requests selected.");

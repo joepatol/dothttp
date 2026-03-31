@@ -7,7 +7,35 @@ pub enum SelectionResult {
     NoneSelected,
 }
 
-pub fn select(requests: &[DiscoveredRequest]) -> SelectionResult {
+/// Select requests to run.
+///
+/// If `filter` is `Some(id)`, skip any prompt and return the single request
+/// whose identifier matches `id`. Exits the process with an error if no match.
+///
+/// If `filter` is `None`, fall back to the interactive multi-select prompt
+/// (or run-all in non-TTY mode).
+pub fn select(requests: &[DiscoveredRequest], filter: Option<&str>) -> SelectionResult {
+    if let Some(id) = filter {
+        let indices: Vec<usize> = requests
+            .iter()
+            .enumerate()
+            .filter(|(_, r)| r.identifier == id)
+            .map(|(i, _)| i)
+            .collect();
+
+        if indices.is_empty() {
+            let available: Vec<&str> = requests.iter().map(|r| r.identifier.as_str()).collect();
+            eprintln!("error: no request found with identifier '{id}'");
+            eprintln!("available identifiers:");
+            for id in &available {
+                eprintln!("  {id}");
+            }
+            std::process::exit(1);
+        }
+
+        return SelectionResult::Selected(indices);
+    }
+
     if !std::io::stdin().is_terminal() {
         eprintln!("Non-interactive mode: running all requests");
         return SelectionResult::Selected((0..requests.len()).collect());

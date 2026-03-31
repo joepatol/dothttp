@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "dothttp",
+  "scopeName": "source.dothttp",
+  "patterns": [
+    { "include": "#separator" },
+    { "include": "#comment" },
+    { "include": "#variable_declaration" },
+    { "include": "#request_line" },
+    { "include": "#header" },
+    { "include": "#variable_reference" }
+  ],
+  "repository": {
+    "separator": {
+      "name": "entity.name.section.dothttp",
+      "match": "^###.*$"
+    },
+    "comment": {
+      "name": "comment.line.number-sign.dothttp",
+      "match": "^#(?!##).*$"
+    },
+    "variable_declaration": {
+      "name": "meta.variable.dothttp",
+      "match": "^(@[A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*(.*)$",
+      "captures": {
+        "1": { "name": "variable.other.dothttp" },
+        "2": { "name": "string.unquoted.dothttp" }
+      }
+    },
+    "request_line": {
+      "name": "meta.request-line.dothttp",
+      "match": "^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\\s+(\\S+)(?:\\s+(HTTP/[\\d.]+))?$",
+      "captures": {
+        "1": { "name": "keyword.other.http-method.dothttp" },
+        "2": { "name": "markup.underline.link.dothttp" },
+        "3": { "name": "constant.language.http-version.dothttp" }
+      }
+    },
+    "header": {
+      "name": "meta.header.dothttp",
+      "match": "^([A-Za-z][A-Za-z0-9\\-]*)\\s*:\\s*(.+)$",
+      "captures": {
+        "1": { "name": "keyword.other.header-name.dothttp" },
+        "2": { "name": "string.unquoted.header-value.dothttp" }
+      }
+    },
+    "variable_reference": {
+      "name": "variable.other.dothttp",
+      "match": "\\{\\{[A-Za-z_][A-Za-z0-9_]*\\}\\}"
+    }
+  }
+}
