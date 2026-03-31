@@ -83,7 +83,7 @@ export class DothttpCodeLensProvider implements vscode.CodeLensProvider {
 
   constructor(private readonly context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeTextDocument(
-      () => this.changeEmitter.fire(),
+      (_) => this.changeEmitter.fire(),
       null,
       context.subscriptions
     );
@@ -94,7 +94,7 @@ export class DothttpCodeLensProvider implements vscode.CodeLensProvider {
     return requests.map(({ line, identifier }) => {
       const range = new vscode.Range(line, 0, line, 0);
       return new vscode.CodeLens(range, {
-        title: "▶ Run",
+        title: "▶ Send request",
         command: "dothttp.runRequest",
         arguments: [document.uri.fsPath, identifier],
       });
