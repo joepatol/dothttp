@@ -1,0 +1,6 @@
+@baseUrl = http://api.example.com
+@token = secret-token-123
+
+### Get users with variables
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}

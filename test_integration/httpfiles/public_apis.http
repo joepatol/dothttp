@@ -1,0 +1,109 @@
+// Public API integration tests
+// Tests variables, interpolation, GET/POST/PUT/PATCH/DELETE, headers, and body parsing
+
+@baseUrlJsonPlaceholder = https://jsonplaceholder.typicode.com
+@baseUrlPoke = https://pokeapi.co/api/v2
+@baseUrlHttpbin = https://httpbin.org
+@baseUrlWeather = https://api.open-meteo.com/v1
+
+@userId = 1
+@postId = 1
+@pokemonName = pikachu
+@contentType = application/json
+
+// ── JSONPlaceholder ─────────────────────────────────────────────────────────
+
+### Get all posts
+GET {{baseUrlJsonPlaceholder}}/posts
+Accept: application/json
+
+### Get single post
+GET {{baseUrlJsonPlaceholder}}/posts/{{postId}}
+Accept: {{contentType}}
+
+### Get comments for post
+GET {{baseUrlJsonPlaceholder}}/posts/{{postId}}/comments
+Accept: application/json
+
+### Get user
+GET {{baseUrlJsonPlaceholder}}/users/{{userId}}
+Accept: application/json
+
+### Create post
+POST {{baseUrlJsonPlaceholder}}/posts
+Content-Type: {{contentType}}
+
+{
+    "title": "dothttp test post",
+    "body": "Testing the dothttp runner against a real API",
+    "userId": {{userId}}
+}
+
+### Update post (full replace)
+PUT {{baseUrlJsonPlaceholder}}/posts/{{postId}}
+Content-Type: {{contentType}}
+
+{
+    "id": {{postId}},
+    "title": "Updated title",
+    "body": "Updated body content",
+    "userId": {{userId}}
+}
+
+### Patch post (partial update)
+PATCH {{baseUrlJsonPlaceholder}}/posts/{{postId}}
+Content-Type: {{contentType}}
+
+{
+    "title": "Patched title only"
+}
+
+### Delete post
+DELETE {{baseUrlJsonPlaceholder}}/posts/{{postId}}
+
+// ── PokeAPI ─────────────────────────────────────────────────────────────────
+
+### Get pokemon by name
+GET {{baseUrlPoke}}/pokemon/{{pokemonName}}
+Accept: application/json
+
+### Get pokemon species
+GET {{baseUrlPoke}}/pokemon-species/{{pokemonName}}
+Accept: application/json
+
+### List all types
+GET {{baseUrlPoke}}/type
+Accept: application/json
+
+// ── httpbin (echo service — great for verifying headers/body are sent) ──────
+
+### Echo GET request headers
+GET {{baseUrlHttpbin}}/get
+Accept: application/json
+X-Custom-Header: dothttp-runner
+X-Request-Source: integration-test
+
+### Echo POST with JSON body
+POST {{baseUrlHttpbin}}/post
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+    "tool": "dothttp",
+    "test": "body interpolation with {{pokemonName}}",
+    "userId": {{userId}}
+}
+
+### Echo request with query params in URL
+GET {{baseUrlHttpbin}}/get?source=dothttp&pokemon={{pokemonName}}
+Accept: application/json
+
+### Check response status codes
+GET {{baseUrlHttpbin}}/status/200
+Accept: application/json
+
+// ── Open-Meteo (free weather, no auth needed) ────────────────────────────────
+
+### Current weather in Amsterdam
+GET {{baseUrlWeather}}/forecast?latitude=52.37&longitude=4.90&current_weather=true
+Accept: application/json
