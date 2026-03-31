@@ -1,0 +1,20 @@
+schema: spec-driven
+
+context: |
+  A parser for http files including async request runner and cli.
+  Tech stack:
+  - Language: Rust
+  - Async runtime: Tokio
+  - HTTP client: Reqwest
+  - CLI: Clap
+  - Parser: Winnow
+  Tests:
+  - Use act, arrange, assert pattern
+  - use fixtures for complex test inputs
+  - test both unit and integration aspects
+  - Tests live in the same module as the code they test, using #[cfg(test)]
+  - Mocks are kept in a separate package
+  Project structure:
+  - dothttp-parser: A library for parsing http files, including variables
+  - dothttp-runner: Async connection pool to run http requests and collect responses
+  - dothttp-cli: A command-line interface to run http files using the parser and runner

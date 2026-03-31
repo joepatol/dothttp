@@ -1,0 +1,21 @@
+[package]
+name = "dothttp-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "dothttp"
+path = "src/main.rs"
+
+[dependencies]
+dothttp-parser = { path = "../dothttp-parser" }
+dothttp-runner = { path = "../dothttp-runner" }
+clap = { version = "4", features = ["derive"] }
+inquire = "0.7"
+walkdir = "2"
+colored = "2"
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[dev-dependencies]
+tempfile = "3"

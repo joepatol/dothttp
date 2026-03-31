@@ -1,0 +1,18 @@
+@baseUrl = https://api.example.com
+@token = secret-token-123
+@userId = 42
+
+### Get user by variable URL
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Create user with variable body
+POST {{baseUrl}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "id": {{userId}},
+    "source": "{{baseUrl}}"
+}

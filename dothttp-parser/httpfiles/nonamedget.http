@@ -1,0 +1,3 @@
+GET http://api.example.com/users/123
+Accept: application/json
+Origin: http://somewhere.com

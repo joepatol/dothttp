@@ -1,0 +1,2 @@
+### GET with http version
+GET http://api.example.com/users/123 HTTP/2.0
